@@ -107,8 +107,8 @@ public class StudentManagementFrame extends JFrame {
 
     private void initUI() {
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setMinimumSize(new Dimension(1150, 720));
-        setPreferredSize(new Dimension(1200, 760));
+        setMinimumSize(new Dimension(1220, 720));
+        setPreferredSize(new Dimension(1260, 760));
         setLocationRelativeTo(null);
 
         JPanel contentPane = new JPanel(new BorderLayout(0, 8));
@@ -120,7 +120,7 @@ public class StudentManagementFrame extends JFrame {
 
         // 2. Center Split (Form on Left, Table on Right)
         JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, createFormPanel(), createTablePanel());
-        splitPane.setDividerLocation(430);
+        splitPane.setDividerLocation(390);
         splitPane.setContinuousLayout(true);
         splitPane.setBorder(null);
         splitPane.setOpaque(false);
@@ -146,7 +146,7 @@ public class StudentManagementFrame extends JFrame {
         JPanel titleBox = new JPanel(new GridLayout(2, 1, 0, 2));
         titleBox.setOpaque(false);
 
-        JLabel lblTitle = new JLabel("🎓 Student Information Management System");
+        JLabel lblTitle = new JLabel("Student Information Management System");
         lblTitle.setFont(new Font("Segoe UI", Font.BOLD, 19));
         lblTitle.setForeground(new Color(26, 43, 76));
 
@@ -163,7 +163,7 @@ public class StudentManagementFrame extends JFrame {
         statusBox.setOpaque(false);
 
         String connectedUrl = DBConnection.getInstance().getConnectedUrl();
-        JLabel lblDbBadge = new JLabel("🟢 Oracle JDBC Connected");
+        JLabel lblDbBadge = new JLabel("\u25CF Oracle JDBC Connected");
         lblDbBadge.setFont(new Font("Segoe UI", Font.BOLD, 12));
         lblDbBadge.setForeground(new Color(22, 101, 52));
         lblDbBadge.setToolTipText(connectedUrl != null ? connectedUrl : "Oracle Database");
@@ -249,16 +249,19 @@ public class StudentManagementFrame extends JFrame {
         gbc.gridx = 1; gbc.weightx = 1.0;
         grid.add(cmbDept, gbc);
 
-        // Row 6: Year & Section
+        // Row 6: Year & Section with explicit sizes
         gbc.gridx = 0; gbc.gridy = 6; gbc.weightx = 0;
         grid.add(createFormLabel("Year & Section *"), gbc);
         JPanel yearSecPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 6, 0));
         yearSecPanel.setOpaque(false);
         cmbYear = new JComboBox<>(new Integer[]{1, 2, 3, 4, 5});
         cmbYear.setSelectedItem(2);
+        cmbYear.setPreferredSize(new Dimension(80, 26));
         cmbSection = new JComboBox<>(new String[]{"A", "B", "C", "D"});
+        cmbSection.setPreferredSize(new Dimension(80, 26));
         yearSecPanel.add(new JLabel("Yr:"));
         yearSecPanel.add(cmbYear);
+        yearSecPanel.add(Box.createHorizontalStrut(6));
         yearSecPanel.add(new JLabel("Sec:"));
         yearSecPanel.add(cmbSection);
         gbc.gridx = 1; gbc.weightx = 1.0;
@@ -306,15 +309,16 @@ public class StudentManagementFrame extends JFrame {
 
         formWrapper.add(new JScrollPane(grid), BorderLayout.CENTER);
 
-        // Action Buttons Panel
+        // Action Buttons Panel - Clean text, distinct colors, comfortable sizing
         JPanel btnPanel = new JPanel(new GridLayout(2, 2, 8, 8));
         btnPanel.setOpaque(false);
         btnPanel.setBorder(new EmptyBorder(8, 0, 0, 0));
+        btnPanel.setPreferredSize(new Dimension(0, 80));
 
-        btnAdd = createStyledButton("➕ Add Student", new Color(22, 101, 52), new Color(34, 197, 94));
-        btnUpdate = createStyledButton("✏️ Update", new Color(30, 64, 175), new Color(59, 130, 246));
-        btnDelete = createStyledButton("🗑️ Delete", new Color(153, 27, 27), new Color(239, 68, 68));
-        btnClear = createStyledButton("🧹 Clear Form", new Color(71, 85, 105), new Color(148, 163, 184));
+        btnAdd = createStyledButton("+ Add Student", new Color(22, 101, 52), new Color(34, 139, 34));
+        btnUpdate = createStyledButton("Update Record", new Color(30, 64, 175), new Color(37, 99, 235));
+        btnDelete = createStyledButton("Delete Record", new Color(153, 27, 27), new Color(185, 28, 28));
+        btnClear = createStyledButton("Clear Form", new Color(71, 85, 105), new Color(100, 116, 139));
 
         btnPanel.add(btnAdd);
         btnPanel.add(btnUpdate);
@@ -347,26 +351,34 @@ public class StudentManagementFrame extends JFrame {
         ));
         tableWrapper.setBackground(Color.WHITE);
 
-        // Search and Toolbar
-        JPanel toolbar = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 4));
+        // Search and Toolbar: split into Left (Search/Filter) and Right (Actions)
+        JPanel toolbar = new JPanel(new BorderLayout(6, 0));
         toolbar.setOpaque(false);
 
-        toolbar.add(new JLabel("🔍 Search:"));
-        txtSearch = new JTextField(14);
+        JPanel searchPart = new JPanel(new FlowLayout(FlowLayout.LEFT, 6, 4));
+        searchPart.setOpaque(false);
+        searchPart.add(new JLabel("Search:"));
+        txtSearch = new JTextField(12);
         txtSearch.setToolTipText("Filter live by roll number, name, department, phone, or email");
-        toolbar.add(txtSearch);
+        searchPart.add(txtSearch);
 
-        toolbar.add(new JLabel("Dept Filter:"));
+        searchPart.add(new JLabel("Dept:"));
         List<String> filterDepts = new ArrayList<>();
         filterDepts.add("All Departments");
         for (String d : DEPARTMENTS) filterDepts.add(d);
         cmbFilterDept = new JComboBox<>(filterDepts.toArray(new String[0]));
-        toolbar.add(cmbFilterDept);
+        cmbFilterDept.setPreferredSize(new Dimension(160, 26));
+        searchPart.add(cmbFilterDept);
 
-        btnRefresh = new JButton("↻ Refresh");
-        btnExport = new JButton("📥 Export CSV");
-        toolbar.add(btnRefresh);
-        toolbar.add(btnExport);
+        JPanel actionsPart = new JPanel(new FlowLayout(FlowLayout.RIGHT, 6, 4));
+        actionsPart.setOpaque(false);
+        btnRefresh = new JButton("Refresh");
+        btnExport = new JButton("Export CSV");
+        actionsPart.add(btnRefresh);
+        actionsPart.add(btnExport);
+
+        toolbar.add(searchPart, BorderLayout.WEST);
+        toolbar.add(actionsPart, BorderLayout.EAST);
 
         tableWrapper.add(toolbar, BorderLayout.NORTH);
 
@@ -389,16 +401,16 @@ public class StudentManagementFrame extends JFrame {
         th.setBackground(new Color(241, 245, 249));
         th.setForeground(new Color(30, 41, 59));
 
-        // Format column widths
-        tableStudents.getColumnModel().getColumn(0).setPreferredWidth(40);   // ID
+        // Format column widths properly to prevent truncation
+        tableStudents.getColumnModel().getColumn(0).setPreferredWidth(35);   // ID
         tableStudents.getColumnModel().getColumn(1).setPreferredWidth(75);   // Roll
-        tableStudents.getColumnModel().getColumn(2).setPreferredWidth(140);  // Name
-        tableStudents.getColumnModel().getColumn(3).setPreferredWidth(160);  // Dept
-        tableStudents.getColumnModel().getColumn(4).setPreferredWidth(45);   // Year
+        tableStudents.getColumnModel().getColumn(2).setPreferredWidth(130);  // Name
+        tableStudents.getColumnModel().getColumn(3).setPreferredWidth(170);  // Dept
+        tableStudents.getColumnModel().getColumn(4).setPreferredWidth(40);   // Year
         tableStudents.getColumnModel().getColumn(5).setPreferredWidth(40);   // Sec
-        tableStudents.getColumnModel().getColumn(6).setPreferredWidth(55);   // Gender
+        tableStudents.getColumnModel().getColumn(6).setPreferredWidth(60);   // Gender
         tableStudents.getColumnModel().getColumn(7).setPreferredWidth(95);   // Phone
-        tableStudents.getColumnModel().getColumn(8).setPreferredWidth(140);  // Email
+        tableStudents.getColumnModel().getColumn(8).setPreferredWidth(160);  // Email
         tableStudents.getColumnModel().getColumn(9).setPreferredWidth(85);   // DOB
 
         // Custom zebra striping renderer
@@ -473,18 +485,32 @@ public class StudentManagementFrame extends JFrame {
         return label;
     }
 
+    /**
+     * Creates a custom painted button with anti-aliasing, rounded corners,
+     * crisp centered white text, and rollover/press states that work reliably across
+     * all Swing Look and Feels (especially Windows L&F).
+     */
     private JButton createStyledButton(String text, Color normalColor, Color hoverColor) {
         JButton btn = new JButton(text) {
             @Override
             protected void paintComponent(Graphics g) {
                 Graphics2D g2 = (Graphics2D) g.create();
                 g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                g2.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
+
                 Color fill = getModel().isPressed() ? normalColor.darker() :
                              getModel().isRollover() ? hoverColor : normalColor;
                 g2.setColor(fill);
-                g2.fillRoundRect(0, 0, getWidth(), getHeight(), 6, 6);
+                g2.fillRoundRect(0, 0, getWidth(), getHeight(), 8, 8);
+
+                // Draw centered white text cleanly without L&F clipping
+                g2.setColor(Color.WHITE);
+                g2.setFont(getFont());
+                FontMetrics fm = g2.getFontMetrics();
+                int textX = (getWidth() - fm.stringWidth(getText())) / 2;
+                int textY = (getHeight() - fm.getHeight()) / 2 + fm.getAscent();
+                g2.drawString(getText(), textX, textY);
                 g2.dispose();
-                super.paintComponent(g);
             }
         };
         btn.setFont(new Font("Segoe UI", Font.BOLD, 12));
@@ -494,7 +520,7 @@ public class StudentManagementFrame extends JFrame {
         btn.setFocusPainted(false);
         btn.setOpaque(false);
         btn.setCursor(new Cursor(Cursor.HAND_CURSOR));
-        btn.setBorder(new EmptyBorder(7, 12, 7, 12));
+        btn.setBorder(new EmptyBorder(8, 12, 8, 12));
         return btn;
     }
 
@@ -514,10 +540,10 @@ public class StudentManagementFrame extends JFrame {
                 try {
                     loadedStudents = get();
                     displayStudentsInTable(loadedStudents);
-                    lblStatus.setText("✓ Successfully loaded " + loadedStudents.size() + " records from Oracle DB.");
+                    lblStatus.setText("Connected: Successfully loaded " + loadedStudents.size() + " records from Oracle DB.");
                     lblStatus.setForeground(new Color(22, 101, 52));
                 } catch (Exception ex) {
-                    lblStatus.setText("❌ Failed to load students: " + ex.getMessage());
+                    lblStatus.setText("Failed to load students: " + ex.getMessage());
                     lblStatus.setForeground(new Color(185, 28, 28));
                     JOptionPane.showMessageDialog(StudentManagementFrame.this,
                             "Error connecting to database:\n" + ex.getMessage(),
@@ -654,7 +680,7 @@ public class StudentManagementFrame extends JFrame {
                 protected void done() {
                     try {
                         get();
-                        lblStatus.setText("✓ Added student " + student.getFullName() + " (" + student.getRollNumber() + ")");
+                        lblStatus.setText("Added student " + student.getFullName() + " (" + student.getRollNumber() + ")");
                         lblStatus.setForeground(new Color(22, 101, 52));
                         JOptionPane.showMessageDialog(StudentManagementFrame.this,
                                 "Student record created successfully!", "Success", JOptionPane.INFORMATION_MESSAGE);
@@ -693,7 +719,7 @@ public class StudentManagementFrame extends JFrame {
                 protected void done() {
                     try {
                         get();
-                        lblStatus.setText("✓ Updated student " + student.getFullName() + " (" + student.getRollNumber() + ")");
+                        lblStatus.setText("Updated student " + student.getFullName() + " (" + student.getRollNumber() + ")");
                         lblStatus.setForeground(new Color(22, 101, 52));
                         JOptionPane.showMessageDialog(StudentManagementFrame.this,
                                 "Student record updated successfully!", "Success", JOptionPane.INFORMATION_MESSAGE);
@@ -742,7 +768,7 @@ public class StudentManagementFrame extends JFrame {
             protected void done() {
                 try {
                     get();
-                    lblStatus.setText("✓ Student " + name + " deleted successfully.");
+                    lblStatus.setText("Student " + name + " deleted successfully.");
                     lblStatus.setForeground(new Color(22, 101, 52));
                     JOptionPane.showMessageDialog(StudentManagementFrame.this,
                             "Student record deleted successfully.", "Deleted", JOptionPane.INFORMATION_MESSAGE);
@@ -781,7 +807,7 @@ public class StudentManagementFrame extends JFrame {
     // ── Exception Handling Helpers ───────────────────────────────────────────
 
     private void handleValidationException(ValidationException ve) {
-        lblStatus.setText("❌ Validation Error: " + ve.getMessage());
+        lblStatus.setText("Validation Error: " + ve.getMessage());
         lblStatus.setForeground(new Color(185, 28, 28));
 
         JOptionPane.showMessageDialog(this,
@@ -797,7 +823,7 @@ public class StudentManagementFrame extends JFrame {
     }
 
     private void handleError(Throwable root) {
-        lblStatus.setText("❌ Error: " + root.getMessage());
+        lblStatus.setText("Error: " + root.getMessage());
         lblStatus.setForeground(new Color(185, 28, 28));
 
         if (root instanceof ValidationException) {
